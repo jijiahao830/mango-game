@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>宝箱抽奖游戏</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="app">
+    <section id="splashScreen" class="screen active">
+      <div class="splash-panel">
+        <img class="splash-logo" src="./assets/logo.png" width="120" height="120" alt="MG" />
+        <p class="eyebrow">宝箱抽奖</p>
+        <h1>宝箱抽奖</h1>
+        <p>三档宝箱，必得奖励，试试你的运气。</p>
+        <!-- 大奖展示区域 -->
+        <div class="showcase-section">
+          <div class="showcase-title">热门大奖</div>
+          <div class="showcase-list">
+            <div class="showcase-item showcase-legend">
+              <span class="showcase-icon">🏎️</span>
+              <span class="showcase-name">兰博基尼/法拉利</span>
+              <span class="showcase-value">¥4,999</span>
+            </div>
+            <div class="showcase-item showcase-red">
+              <span class="showcase-icon">🚗</span>
+              <span class="showcase-name">保时捷718/奔驰C63</span>
+              <span class="showcase-value">¥1,299</span>
+            </div>
+            <div class="showcase-item showcase-gold">
+              <span class="showcase-icon">🎁</span>
+              <span class="showcase-name">500元租车券</span>
+              <span class="showcase-value">¥500</span>
+            </div>
+          </div>
+        </div>
+        <div class="splash-actions">
+          <button id="phoneLoginBtn" class="btn primary" onclick="openPhoneModal()">登录即可抽奖</button>
+        </div>
+        <p id="userPhoneDisplay" class="user-phone-hint" style="display:none;margin-top:12px;color:var(--muted);font-size:13px;"></p>
+      </div>
+    </section>
+
+    <section id="menuScreen" class="screen">
+      <div class="screen-panel">
+        <header class="topbar">
+          <div class="topbar-brand">
+            <img class="app-logo" src="./assets/logo.png" width="44" height="44" alt="" />
+            <h2>选择宝箱</h2>
+          </div>
+          <div class="chip">剩余 <span id="menuCoins">0次</span></div>
+        </header>
+        <div class="case-list">
+          <button type="button" class="case-card case-card--basic" onclick="selectCase('basic')">
+            <div class="case-card-img-wrap">
+              <img class="case-card-img" src="./assets/box/basic.png" alt="普通宝箱" loading="eager" />
+            </div>
+            <strong>普通宝箱</strong>
+            <span>免费 · 日常可开</span>
+          </button>
+          <button type="button" class="case-card case-card--advanced" onclick="selectCase('advanced')">
+            <div class="case-card-img-wrap">
+              <img class="case-card-img" src="./assets/box/advanced.png" alt="高级宝箱" loading="eager" />
+            </div>
+            <strong>高级宝箱</strong>
+            <span>后台配置次数 · 老客户专属</span>
+          </button>
+          <button type="button" class="case-card case-card--premium" onclick="selectCase('premium')">
+            <div class="case-card-img-wrap">
+              <img class="case-card-img" src="./assets/box/premium.png" alt="传说宝箱" loading="eager" />
+            </div>
+            <strong>传说宝箱</strong>
+            <span>后台配置次数 · 高价值客户专属</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="openScreen" class="screen" data-tier="basic">
+      <div class="screen-panel open-screen-panel">
+        <header class="topbar">
+          <div class="topbar-brand">
+            <img class="app-logo" src="./assets/logo.png" width="44" height="44" alt="" />
+            <h2 id="openTierTitle">普通宝箱</h2>
+          </div>
+          <div class="chip">剩余 <span id="openCoins">0次</span></div>
+        </header>
+        <p id="openLabel" class="subtle"></p>
+        <p id="openPityHint" class="subtle open-pity-hint" aria-live="polite"></p>
+        <div class="open-stage">
+          <canvas id="openCanvas" width="380" height="320"></canvas>
+          <canvas id="particles" width="380" height="320"></canvas>
+        </div>
+        <div id="wheelContainer">
+          <div id="wheelTrack"></div>
+        </div>
+        <div class="actions actions--open">
+          <button id="openBtn" type="button" class="open-btn" onclick="handleOpenBtnClick()">开启宝箱</button>
+          <button id="oneClickOpenBtn" type="button" class="btn open-oneclick-btn" onclick="openOneClickOnCurrentScreen()">一键开启（用完本档剩余次数）</button>
+          <button class="btn" onclick="goMenu()">返回菜单</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="resultScreen" class="screen">
+      <div class="screen-panel result-panel">
+        <div class="result-brand">
+          <img class="app-logo app-logo--sm" src="./assets/logo.png" width="40" height="40" alt="" />
+        </div>
+        <div class="result-stage">
+          <canvas id="resultBgCanvas" width="380" height="320"></canvas>
+          <div class="result-card">
+            <div id="resRarity" class="result-rarity">普通</div>
+            <div id="resIcon" class="result-icon"></div>
+            <h3 id="resName">奖品名称</h3>
+            <p id="resDesc">奖品描述</p>
+            <div id="resValue" class="result-value">价值 ¥ 0</div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn primary" onclick="openAgain()">再开一箱</button>
+          <button class="btn" onclick="goMenu()">返回菜单</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="inviteScreen" class="screen">
+      <div class="screen-panel">
+        <header class="topbar">
+          <div class="topbar-brand">
+            <img class="app-logo" src="./assets/logo.png" width="44" height="44" alt="" />
+            <h2>邀请奖励</h2>
+          </div>
+          <div class="chip">已邀请 <span id="invCoins">0人</span></div>
+        </header>
+        <p id="inviteIntro">分享你的专属链接，新用户完成手机号验证后，双方各得 1 次普通宝箱抽奖积分。</p>
+        <div class="progress">
+          <div id="invBar"></div>
+        </div>
+        <p>当前有效邀请人数：<strong id="invCount">0</strong> / 5</p>
+        <div id="pendingReferralNotice" class="invite-notice" style="display:none;"></div>
+        <div class="invite-card">
+          <label class="invite-label" for="inviteLink">我的邀请链接</label>
+          <div class="invite-link-row">
+            <input id="inviteLink" class="invite-link-input" type="text" readonly value="登录后生成邀请链接" />
+            <button type="button" class="btn" onclick="copyInviteLink()">复制</button>
+          </div>
+          <div class="invite-actions">
+            <button type="button" class="btn primary" onclick="shareInviteLink()">分享链接</button>
+            <button type="button" class="btn" onclick="openPhoneModal()">输入信息</button>
+          </div>
+        </div>
+        <ul class="reward-list">
+          <li>第 1 位新用户：<span id="rw1" class="ri-status">未完成</span></li>
+          <li>第 3 位新用户：<span id="rw2" class="ri-status">未完成</span></li>
+          <li>第 5 位新用户：<span id="rw3" class="ri-status">未完成</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="awardsScreen" class="screen">
+      <div class="screen-panel">
+        <header class="topbar">
+          <div class="topbar-brand">
+            <img class="app-logo" src="./assets/logo.png" width="44" height="44" alt="" />
+            <h2>已获得</h2>
+          </div>
+          <div class="chip">共 <span id="awardCount">0个</span></div>
+        </header>
+        <div id="awardsList" class="awards-list">
+          <div class="awards-empty">登录后查看已获得奖品</div>
+        </div>
+      </div>
+    </section>
+
+    <nav class="bottom-nav">
+      <button id="tabMenu" class="nav-tab active" onclick="switchTab('menu')">首页</button>
+      <button id="tabAwards" class="nav-tab" onclick="switchTab('awards')">已获得</button>
+      <button id="tabInv" class="nav-tab" onclick="switchTab('invite')">邀请</button>
+    </nav>
+  </main>
+
+  <!-- 客户信息登录弹窗 -->
+  <div id="phoneModal" class="modal" aria-hidden="true">
+    <button type="button" class="modal-backdrop" onclick="closePhoneModal()" aria-label="关闭"></button>
+    <div class="modal-dialog purchase-dialog" role="dialog" aria-modal="true" aria-labelledby="phoneTitle">
+      <header class="purchase-head">
+        <h2 id="phoneTitle">客户信息确认</h2>
+        <p class="purchase-hint">请输入姓名和手机号，系统会发放后台预配置的宝箱抽奖次数。</p>
+      </header>
+      <div class="purchase-body">
+        <div class="purchase-block">
+          <h3 class="purchase-block-title">输入姓名</h3>
+          <input type="text" id="nameInput" class="purchase-qty-input"
+                 style="width:100%;text-align:center;font-size:16px"
+                 placeholder="请输入姓名" maxlength="20" autocomplete="name" />
+        </div>
+        <div class="purchase-block">
+          <h3 class="purchase-block-title">输入手机号</h3>
+          <input type="tel" id="phoneInput" class="purchase-qty-input"
+                 style="width:100%;text-align:center;font-size:16px"
+                 placeholder="请输入11位手机号" maxlength="11" inputmode="numeric" autocomplete="tel" />
+        </div>
+      </div>
+      <footer class="purchase-actions">
+        <button type="button" class="btn" onclick="closePhoneModal()">取消</button>
+        <button type="button" id="loginSubmitBtn" class="btn primary" onclick="loginCustomer()">确认领取</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- 获得次数弹窗 -->
+  <div id="grantModal" class="modal" aria-hidden="true">
+    <button type="button" class="modal-backdrop" onclick="closeGrantModal()" aria-label="关闭"></button>
+    <div class="modal-dialog purchase-dialog" role="dialog" aria-modal="true" aria-labelledby="grantTitle">
+      <header class="purchase-head">
+        <h2 id="grantTitle">抽奖次数已发放</h2>
+        <p class="purchase-hint">你当前可使用的宝箱抽奖次数如下。</p>
+      </header>
+      <div class="purchase-body">
+        <div class="grant-list">
+          <div class="grant-item"><span>普通宝箱</span><strong id="grantBasic">0 次</strong></div>
+          <div class="grant-item"><span>高级宝箱</span><strong id="grantAdvanced">0 次</strong></div>
+          <div class="grant-item"><span>传说宝箱</span><strong id="grantPremium">0 次</strong></div>
+        </div>
+      </div>
+      <footer class="purchase-actions">
+        <button type="button" class="btn primary" onclick="closeGrantModal()">开始游戏</button>
+      </footer>
+    </div>
+  </div>
+
+  <div id="prizePoolModal" class="modal" aria-hidden="true">
+    <button type="button" class="modal-backdrop" onclick="closePrizePoolModal()" aria-label="关闭预览"></button>
+    <div class="modal-dialog prize-pool-dialog" role="dialog" aria-modal="true" aria-labelledby="prizePoolTitle" data-tier="basic">
+      <header class="prize-pool-head">
+        <h2 id="prizePoolTitle">奖池一览</h2>
+        <p id="prizePoolSub" class="prize-pool-sub"></p>
+      </header>
+      <div id="prizePoolList" class="prize-pool-list"></div>
+      <footer class="prize-pool-actions">
+        <button type="button" class="btn" onclick="closePrizePoolModal()">取消</button>
+        <button type="button" class="btn primary" id="prizePoolConfirm" onclick="confirmPrizePoolAndEnter()">确认</button>
+      </footer>
+    </div>
+  </div>
+
+  <script src="./game.js"></script>
+</body>
+</html>

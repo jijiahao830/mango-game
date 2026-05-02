@@ -1,0 +1,32 @@
+﻿Original prompt: 修好
+
+- Fixed the missing `open` branch in screen switching so selecting a case can enter the open screen again.
+- Aligning the result description class name with the CSS selector.
+- Updating the shared badge text to show the resource relevant to the current case tier instead of always showing free opens.
+- Static syntax check passed with `node --check game.js`.
+- Installed `playwright` under the web-game skill so browser validation could run.
+- Browser validation exposed another runtime bug in `showResult`: the loop that clears active screens used `screens.length` instead of `si < screens.length`, leaving the UI with no active screen after opening.
+- Re-ran the browser flow after the fix to verify splash -> menu -> open screen -> result screen with no runtime errors.
+- New request: 构建 CSGO 风格开箱抽奖游戏。
+- Added a full `index.html` page scaffold wired to existing JS ids and screen flow (splash/menu/open/result/collection/invite + bottom nav).
+- Added `styles.css` with dark CSGO-style visual layout, wheel list styling, rarity colors, cards, toasts, and responsive behavior.
+- Extended `game.js` with automation hooks: `window.render_game_to_text`, `window.advanceTime(ms)`, active screen introspection, and `f` key fullscreen toggle.
+- Syntax check passed: `node --check game.js`.
+- Playwright client run passed without new `output/web-game/errors-*.json`; screenshot/state artifacts generated under `output/web-game`.
+- Current automated actions only reached menu screen due canvas-relative click choreography limits; recommend adding selector-based multi-step action support in test client for full open-result coverage.
+- UI continuity pass:
+  - Refactored `index.html` into consistent `screen-panel` sections for all screens.
+  - Added dedicated `open-stage` and `result-stage` wrappers so canvas layers, particles, and result card are visually integrated.
+  - Reworked `styles.css` with unified visual language (gradients, borders, spacing, typography hierarchy, hover feedback, nav blur, responsive breakpoints).
+  - Re-ran Playwright flow (`#splashBtn` + open-actions); output screenshot confirms cleaner and more consistent menu layout.
+- 按“先删除再重写”需求重做了宝箱视觉与文案：
+  - 三档命名改为：普通宝箱 / 高级宝箱 / 传说宝箱。
+  - 去掉英文稀有度和英文提示文案，界面文本改为中文。
+  - 奖品数据去掉 emoji 字段，改为 icon 字段，并新增本地图标资源 `assets/icons/*.svg`。
+  - 轮盘改为图标 + 多行名称展示，扩大单项宽度与高度，避免奖品名显示不完整。
+  - 结果页与图鉴页改为使用 SVG 图标展示奖励。
+- 轮盘体验增强：
+  - 增加无限循环滚动视觉（滚动过程中按循环宽度回绕，避免跑到边界）。
+  - 增加轮盘中央定位线，用于明确最终停留位置。
+  - 开奖速度改为前快后慢，末段显著减速，营造紧张感。
+  - 奖品按稀有度分色显示，传说（大奖）改为更显眼橙色，并增加高亮边框。
